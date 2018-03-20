@@ -38,10 +38,11 @@ def main(_):
     
     input_image = tf.placeholder(tf.float32, shape = [FLAGS.batch_size, 64, 64, 3])
     z = tf.placeholder(tf.float32, shape = [None, 100])
-
+#   discriminate images from real dataset
     D, D_logit = discriminator(input_image, FLAGS.batch_size, re_use = False)
     G = generator(z, FLAGS.output_height, FLAGS.output_width, FLAGS.batch_size,
                   training = True, re_use = False)
+#   discriminate images from generator
     D_, D_logit_ = discriminator(G, FLAGS.batch_size, re_use = True)
     
          
@@ -115,13 +116,6 @@ def main(_):
                         samples, sample_d_loss, sample_g_loss = sess.run([sample, d_loss, g_loss], 
                                                         feed_dict = {z: z_batch, input_image: sample_batch})                        
                         
-    #                    mergeImage.save('./samples/'+ str(epo) + '-' + str(counter) + '.png')
-    #                                os.path.join('./samples', str(times), '.jpg'))
-    #                    './{}/train_{:02d}_{:04d}.png'.format('./samples', epo, i))
-#                        b = sample.eval({z:z_batch})
-#                        b = b[10]
-#                        b = (b + 1)*127.5
-#                        cv2.imwrite(str(counter)+'.png', b)
                         show_mergeimage(samples, FLAGS.output_height, FLAGS.output_width, epo, counter, FLAGS.train)
                         print("samlpes: d_loss: %.8f, g_loss: %.8f" % (sample_d_loss, sample_g_loss))
             saver = tf.train.Saver()
