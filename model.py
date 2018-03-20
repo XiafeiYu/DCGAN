@@ -26,36 +26,34 @@ import os
 d_first_dim = 64
 g_last_dim = 64
         
-    #卷积层
+    #convolution
 def conv2d(x, sp, name):
     with tf.variable_scope(name):
-    #shape = [卷积核的高度，卷积核的宽度，卷积核个数，图像通道数]
+    #shape = [height，width，input_channel，output_channel]
         w = tf.get_variable('w', shape = sp, initializer = tf.truncated_normal_initializer(stddev = 0.02))
         conv = tf.nn.conv2d(x, w, strides = [1,2,2,1], padding = 'SAME')
         b = tf.get_variable('b', shape = sp[-1], initializer = tf.zeros_initializer())
 #    return tf.add(conv, b)
         return   tf.reshape(tf.nn.bias_add(conv, b), conv.get_shape())
-    #反卷积层
+    #deconvolution
 def deconv2d(x, output_shape, shape, name):
     with tf.variable_scope(name):
-    # 注意shape的不同,shape = [卷积核的高度，卷积核的宽度，卷积核个数，图像通道数]
+    # shape = [height，width，output_channel，input_channel]
         w = tf.get_variable('w', shape = shape, 
                             initializer = tf.truncated_normal_initializer(stddev = 0.02))
 #                                     initializer = tf.truncated_normal_initializer(stddev = 0.02))
         deconv = tf.nn.conv2d_transpose(x, w, output_shape = output_shape, strides = [1,2,2,1])
         b = tf.get_variable('b', shape = output_shape[-1], initializer = tf.zeros_initializer())
         return tf.reshape(tf.nn.bias_add(deconv, b), deconv.get_shape())
-    #batch normalization层
+    #batch normalization
 def batch_norm(x, training, name):
     with tf.variable_scope(name):
 #        if re_use:
 #            scope.reuse_variables()
-    #此处参数和原程序不一致
         norm = tf.contrib.layers.batch_norm(x, decay = 0.9, updates_collections=None, reuse=tf.AUTO_REUSE,
                                         scope = name, scale = True, epsilon = 1e-5, is_training = training)
     return norm
-#    softmax层，D的最后一层   
-    
+#    linear      
 def linear(x, y_dim, name):
     with tf.variable_scope(name):
         w = tf.get_variable('w', shape = [int(x.shape[1]), y_dim], 
